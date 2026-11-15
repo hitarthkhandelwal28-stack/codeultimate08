@@ -159,7 +159,7 @@ async function api(url, options = {}) {
       throw new Error(`Server returned malformed JSON (HTTP ${response.status}).`);
     }
   } else {
-    const detail = raw.replace(/<[^>]*>/g, " ").replace(/\\s+/g, " ").trim().slice(0, 180);
+    const detail = raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
     throw new Error(
       `Server returned a non-JSON response (HTTP ${response.status}). ${detail || "Check the backend logs."}`
     );
