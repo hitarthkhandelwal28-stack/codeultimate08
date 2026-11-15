@@ -24,7 +24,7 @@ WORKSPACE_DIR = BASE_DIR / "workspaces"
 for folder in (DB_DIR, UPLOAD_DIR, WORKSPACE_DIR):
     folder.mkdir(parents=True, exist_ok=True)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=str(BASE_DIR / "static"), static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = int(os.getenv("MAX_UPLOAD_MB", "5")) * 1024 * 1024
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "dev-only-change-me")
 DB_PATH = DB_DIR / "codeai.db"
