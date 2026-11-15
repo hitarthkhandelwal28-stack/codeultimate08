@@ -234,6 +234,18 @@ async function sendMessage(message) {
   }
 }
 
+// Enter sends the prompt; Shift+Enter inserts a new line.
+promptEl.addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    if (!("requestSubmit" in $("composer"))) {
+      $("sendButton").click();
+    } else {
+      $("composer").requestSubmit();
+    }
+  }
+});
+
 $("composer").addEventListener("submit", async event => {
   event.preventDefault();
   const message = promptEl.value.trim();
