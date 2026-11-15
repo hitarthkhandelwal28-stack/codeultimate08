@@ -12,9 +12,9 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand"><span class="brand-icon">âŒ˜</span><span>CodeAI <small>ULTIMATE</small></span></div>
-      <button id="newChat" class="new-chat">ï¼‹ New chat</button>
+    <aside id="sidebar" class="sidebar">
+      <div class="brand"><span class="brand-icon">&#8984;</span><span>CodeAI <small>ULTIMATE</small></span></div>
+      <button id="newChat" class="new-chat">&#43; New chat</button>
       <div class="side-label">YOUR CHATS</div>
       <div id="chatList" class="chat-list"></div>
       <div class="sidebar-bottom">
@@ -25,10 +25,10 @@
 
     <main class="main">
       <header class="topbar">
-        <button id="mobileMenu" class="icon-button" aria-label="Toggle sidebar">â˜°</button>
-        <div><strong>CodeAI Assistant</strong><span class="subheading">Generate Â· Debug Â· Build</span></div>
+        <button id="mobileMenu" class="icon-button" aria-label="Toggle sidebar">&#9776;</button>
+        <div><strong>CodeAI Assistant</strong><span class="subheading">Generate &middot; Debug &middot; Build</span></div>
         <div class="top-actions">
-          <button id="downloadZip" class="secondary-button" disabled>â†“ Download ZIP</button>
+          <button id="downloadZip" class="secondary-button" disabled>&#8595; Download ZIP</button>
         </div>
       </header>
 
@@ -36,7 +36,7 @@
         <section class="conversation">
           <div id="messages" class="messages">
             <div class="welcome">
-              <div class="welcome-mark">âŒ˜</div>
+              <div class="welcome-mark">&#8984;</div>
               <h1>What are we building?</h1>
               <p>Describe a coding task, paste an error, or ask for a complete project.</p>
               <div class="suggestions">
@@ -54,9 +54,9 @@
             <form id="composer" class="composer">
               <input type="file" id="fileInput" hidden multiple
                 accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt,.java,.cpp,.c,.h,.cs,.php,.go,.rs,.sql,.yaml,.yml,.toml,.xml,.sh">
-              <button type="button" id="attachButton" class="attach-button" title="Upload code files">ï¼‹</button>
+              <button type="button" id="attachButton" class="attach-button" title="Upload code files">&#43;</button>
               <textarea id="prompt" rows="1" placeholder="Ask CodeAI to write or debug code..." required></textarea>
-              <button type="submit" id="sendButton" class="send-button" aria-label="Send">â†‘</button>
+              <button type="submit" id="sendButton" class="send-button" aria-label="Send">&#8593;</button>
             </form>
             <div class="composer-note">AI-generated code can contain errors. Review it before use. CodeAI does not execute generated files.</div>
           </div>
@@ -64,7 +64,7 @@
 
         <aside class="files-panel">
           <div class="panel-heading"><strong>Project files</strong><span id="fileCount">0</span></div>
-          <button id="generateProject" class="generate-button">âœ¦ Generate multi-file project</button>
+          <button id="generateProject" class="generate-button">&#10022; Generate multi-file project</button>
           <div id="fileTree" class="file-tree"><p class="empty-files">Generated project files will appear here.</p></div>
           <div class="preview-heading">FILE PREVIEW</div>
           <pre id="filePreview" class="file-preview">Select a file to preview it.</pre>
