@@ -148,8 +148,24 @@ function showWelcome() {
 
 async function api(url, options = {}) {
   const response = await fetch(url, options);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "Request failed");
+  const contentType = response.headers.get("content-type") || "";
+  const raw = await response.text();
+
+  let data;
+  if (contentType.includes("application/json")) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(`Server returned malformed JSON (HTTP ${response.status}).`);
+    }
+  } else {
+    const detail = raw.replace(/<[^>]*>/g, " ").replace(/\\s+/g, " ").trim().slice(0, 180);
+    throw new Error(
+      `Server returned a non-JSON response (HTTP ${response.status}). ${detail || "Check the backend logs."}`
+    );
+  }
+
+  if (!response.ok) throw new Error(data.error || `Request failed (HTTP ${response.status})`);
   return data;
 }
 
