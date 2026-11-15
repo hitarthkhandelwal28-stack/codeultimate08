@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeAI Ultimate</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-icon">âŒ˜</span><span>CodeAI <small>ULTIMATE</small></span></div>
+      <button id="newChat" class="new-chat">ï¼‹ New chat</button>
+      <div class="side-label">YOUR CHATS</div>
+      <div id="chatList" class="chat-list"></div>
+      <div class="sidebar-bottom">
+        <div class="status-dot"></div>
+        <span>Local workspace</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="mobileMenu" class="icon-button" aria-label="Toggle sidebar">â˜°</button>
+        <div><strong>CodeAI Assistant</strong><span class="subheading">Generate Â· Debug Â· Build</span></div>
+        <div class="top-actions">
+          <button id="downloadZip" class="secondary-button" disabled>â†“ Download ZIP</button>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <section class="conversation">
+          <div id="messages" class="messages">
+            <div class="welcome">
+              <div class="welcome-mark">âŒ˜</div>
+              <h1>What are we building?</h1>
+              <p>Describe a coding task, paste an error, or ask for a complete project.</p>
+              <div class="suggestions">
+                <button data-prompt="Build a Python calculator with a simple graphical interface.">Build a Python app</button>
+                <button data-prompt="Explain and debug this code: ">Debug code</button>
+                <button data-prompt="Create a responsive portfolio website with HTML, CSS and JavaScript.">Create a website</button>
+                <button data-prompt="Explain recursion with a simple example.">Explain a concept</button>
+              </div>
+            </div>
+          </div>
+          <button id="scrollBottom" class="scroll-bottom-btn" aria-label="Scroll to latest message" hidden>&#8595;</button>
+
+          <div class="composer-wrap">
+            <div id="uploadList" class="upload-list"></div>
+            <form id="composer" class="composer">
+              <input type="file" id="fileInput" hidden multiple
+                accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt,.java,.cpp,.c,.h,.cs,.php,.go,.rs,.sql,.yaml,.yml,.toml,.xml,.sh">
+              <button type="button" id="attachButton" class="attach-button" title="Upload code files">ï¼‹</button>
+              <textarea id="prompt" rows="1" placeholder="Ask CodeAI to write or debug code..." required></textarea>
+              <button type="submit" id="sendButton" class="send-button" aria-label="Send">â†‘</button>
+            </form>
+            <div class="composer-note">AI-generated code can contain errors. Review it before use. CodeAI does not execute generated files.</div>
+          </div>
+        </section>
+
+        <aside class="files-panel">
+          <div class="panel-heading"><strong>Project files</strong><span id="fileCount">0</span></div>
+          <button id="generateProject" class="generate-button">âœ¦ Generate multi-file project</button>
+          <div id="fileTree" class="file-tree"><p class="empty-files">Generated project files will appear here.</p></div>
+          <div class="preview-heading">FILE PREVIEW</div>
+          <pre id="filePreview" class="file-preview">Select a file to preview it.</pre>
+        </aside>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+database/*.db
+uploads/*
+!uploads/.gitkeep
+workspaces/*
+!workspaces/.gitkeep
