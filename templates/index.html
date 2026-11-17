@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CodeAI Ultimate</title>
+  <meta name="theme-color" content="#020914">
+  <title>J.A.R.V.I.S. | CodeAI Ultimate</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
@@ -11,34 +12,88 @@
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
 </head>
 <body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
   <div class="app-shell">
     <aside id="sidebar" class="sidebar">
-      <div class="brand"><span class="brand-icon">&#8984;</span><span>CodeAI <small>ULTIMATE</small></span></div>
-      <button id="newChat" class="new-chat">&#43; New chat</button>
-      <div class="side-label">YOUR CHATS</div>
-      <div id="chatList" class="chat-list"></div>
-      <div class="sidebar-bottom">
-        <div class="status-dot"></div>
-        <span>Local workspace</span>
+      <div class="brand">
+        <div class="brand-icon">✧</div>
+        <div><span class="brand-name">J.A.R.V.I.S.</span><small>CODEAI ULTIMATE</small></div>
       </div>
+      <div class="side-status"><span class="status-dot"></span><span>CORE SYSTEM ONLINE</span><span class="live-tag">LIVE</span></div>
+      <button id="newChat" class="new-chat"><span>＋</span> Initialize new chat</button>
+
+      <div class="side-label">SYSTEM MODULES</div>
+      <div class="module-list">
+        <div class="module-item active"><span class="module-icon">⌘</span><span>AI Command Center</span><i></i></div>
+        <div class="module-item"><span class="module-icon">⌁</span><span>Code Intelligence</span></div>
+        <div class="module-item"><span class="module-icon">▤</span><span>Project Explorer</span></div>
+      </div>
+      <div class="side-label chat-label">CONVERSATION LOG</div>
+      <div id="chatList" class="chat-list"></div>
+      <div class="sidebar-bottom"><span class="status-dot"></span><span>Secure local workspace</span><span class="version">v2.0</span></div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <button id="mobileMenu" class="icon-button" aria-label="Toggle sidebar">&#9776;</button>
-        <div><strong>CodeAI Assistant</strong><span class="subheading">Generate &middot; Debug &middot; Build</span></div>
+        <button id="mobileMenu" class="icon-button" aria-label="Toggle sidebar">☰</button>
+        <div class="top-title"><span class="eyebrow">PERSONAL AI INTERFACE</span><strong>COMMAND CENTER</strong></div>
+        <div class="top-center">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
         <div class="top-actions">
-          <button id="downloadZip" class="secondary-button" disabled>&#8595; Download ZIP</button>
+          <div class="clock"><strong id="clockTime">--:--</strong><span id="clockDate">SYSTEM TIME</span></div>
+          <button id="downloadZip" class="secondary-button" disabled>↓ <span>EXPORT ZIP</span></button>
         </div>
       </header>
 
       <section class="workspace">
         <section class="conversation">
+          <div class="dashboard-grid">
+            <section class="telemetry panel">
+              <div class="panel-title"><span class="title-symbol">⌁</span> SYSTEM TELEMETRY <span class="panel-live">● ACTIVE</span></div>
+              <div class="metric"><div class="metric-icon">▣</div><div class="metric-info"><div><span>AI ENGINE</span><b>READY</b></div><div class="meter"><i style="width:92%"></i></div></div></div>
+              <div class="metric"><div class="metric-icon">◈</div><div class="metric-info"><div><span>INTERFACE</span><b>ONLINE</b></div><div class="meter"><i style="width:78%"></i></div></div></div>
+              <div class="metric"><div class="metric-icon">⌘</div><div class="metric-info"><div><span>SESSION</span><b>ACTIVE</b></div><div class="meter"><i style="width:64%"></i></div></div></div>
+              <div class="telemetry-foot">ALL SYSTEMS NOMINAL</div>
+            </section>
+
+            <section class="reactor-stage">
+              <div class="reactor-ring ring-a"></div><div class="reactor-ring ring-b"></div><div class="reactor-ring ring-c"></div>
+              <div class="reactor-core"><div class="core-mark">◇<span>AI</span></div><div class="core-name">J.A.R.V.I.S.</div><div class="core-sub">INTELLIGENCE CORE</div><div class="core-online"><i></i> ONLINE</div></div>
+              <div class="reactor-base"><span></span></div>
+              <div class="reactor-caption">NEURAL INTERFACE <b>CONNECTED</b></div>
+            </section>
+
+            <section class="assistant-panel panel">
+              <div class="panel-title"><span class="title-symbol">◉</span> AI ASSISTANT <span class="panel-live">● READY</span></div>
+              <div class="assistant-greeting"><div class="mic-orb">♩</div><div><span class="greeting-small">GOOD DAY, OPERATOR</span><h2>How can I help<br>you today?</h2></div></div>
+              <div class="waveform"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <p class="assistant-hint">Awaiting your next command...</p>
+            </section>
+
+            <section class="quick-panel panel">
+              <div class="panel-title"><span class="title-symbol">⌘</span> QUICK ACCESS</div>
+              <div class="quick-grid">
+                <div class="quick-tile"><span>⌁</span><b>AI CHAT</b><small>Intelligence</small></div>
+                <div class="quick-tile"><span>&lt;/&gt;</span><b>CODE LAB</b><small>Development</small></div>
+                <div class="quick-tile"><span>▤</span><b>PROJECTS</b><small>File manager</small></div>
+                <div class="quick-tile"><span>✧</span><b>GENERATOR</b><small>Build project</small></div>
+              </div>
+            </section>
+
+            <section class="activity-panel panel">
+              <div class="panel-title"><span class="title-symbol">◷</span> COMMAND SUGGESTIONS</div>
+              <div class="activity-list">
+                <button data-prompt="Build a Python application with a modern graphical interface."><i>01</i><span>Build a Python application</span><b>↗</b></button>
+                <button data-prompt="Review this code, identify bugs, and explain how to fix them: "><i>02</i><span>Analyze and debug code</span><b>↗</b></button>
+                <button data-prompt="Create a responsive website using HTML, CSS and JavaScript."><i>03</i><span>Create a responsive website</span><b>↗</b></button>
+              </div>
+            </section>
+          </div>
+
           <div id="messages" class="messages">
             <div class="welcome">
-              <div class="welcome-mark">&#8984;</div>
-              <h1>What are we building?</h1>
-              <p>Describe a coding task, paste an error, or ask for a complete project.</p>
+              <div class="welcome-mark">◇</div>
+              <h1>Systems ready. What are we building?</h1>
+              <p>Enter a command below to generate code, debug errors or build complete projects.</p>
               <div class="suggestions">
                 <button data-prompt="Build a Python calculator with a simple graphical interface.">Build a Python app</button>
                 <button data-prompt="Explain and debug this code: ">Debug code</button>
@@ -47,33 +102,44 @@
               </div>
             </div>
           </div>
-          <button id="scrollBottom" class="scroll-bottom-btn" aria-label="Scroll to latest message" hidden>&#8595;</button>
+          <button id="scrollBottom" class="scroll-bottom-btn" aria-label="Scroll to latest message" hidden>↓</button>
 
           <div class="composer-wrap">
             <div id="uploadList" class="upload-list"></div>
             <form id="composer" class="composer">
-              <input type="file" id="fileInput" hidden multiple
-                accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt,.java,.cpp,.c,.h,.cs,.php,.go,.rs,.sql,.yaml,.yml,.toml,.xml,.sh">
-              <button type="button" id="attachButton" class="attach-button" title="Upload code files">&#43;</button>
-              <textarea id="prompt" rows="1" placeholder="Ask CodeAI to write or debug code..." required></textarea>
-              <button type="submit" id="sendButton" class="send-button" aria-label="Send">&#8593;</button>
+              <input type="file" id="fileInput" hidden multiple accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt,.java,.cpp,.c,.h,.cs,.php,.go,.rs,.sql,.yaml,.yml,.toml,.xml,.sh">
+              <button type="button" id="attachButton" class="attach-button" title="Upload code files">＋</button>
+              <textarea id="prompt" rows="1" placeholder="Transmit a command to J.A.R.V.I.S...." required></textarea>
+              <button type="submit" id="sendButton" class="send-button" aria-label="Send command">➤</button>
             </form>
-            <div class="composer-note">AI-generated code can contain errors. Review it before use. CodeAI does not execute generated files.</div>
+            <div class="composer-note"><span class="tiny-led"></span> ENCRYPTED SESSION · AI-GENERATED OUTPUT SHOULD BE REVIEWED</div>
           </div>
         </section>
 
         <aside class="files-panel">
-          <div class="panel-heading"><strong>Project files</strong><span id="fileCount">0</span></div>
-          <button id="generateProject" class="generate-button">&#10022; Generate multi-file project</button>
+          <div class="files-head"><div><span class="eyebrow">WORKSPACE</span><strong>PROJECT FILES</strong></div><span id="fileCount" class="file-count">0</span></div>
+          <button id="generateProject" class="generate-button">✧ &nbsp; GENERATE PROJECT</button>
           <div id="fileTree" class="file-tree"><p class="empty-files">Generated project files will appear here.</p></div>
-          <div class="preview-heading">FILE PREVIEW</div>
-          <pre id="filePreview" class="file-preview">Select a file to preview it.</pre>
+          <div class="preview-heading">▤ &nbsp; FILE PREVIEW</div>
+          <pre id="filePreview" class="file-preview">Select a file to preview its contents.</pre>
+          <div class="storage-status"><span class="status-dot"></span> WORKSPACE READY</div>
         </aside>
       </section>
     </main>
   </div>
   <div id="toast" class="toast" role="status"></div>
+  <script>
+    (() => {
+      const time = document.getElementById('clockTime');
+      const date = document.getElementById('clockDate');
+      const update = () => {
+        const now = new Date();
+        time.textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:false});
+        date.textContent = now.toLocaleDateString([], {weekday:'short', month:'short', day:'2-digit', year:'numeric'}).toUpperCase();
+      };
+      update(); setInterval(update, 30000);
+    })();
+  </script>
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
-
