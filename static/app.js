@@ -400,9 +400,14 @@ $("automationButton").addEventListener("click", async () => {
       return;
     }
 
-    const details = plan.actions.map(item => `• ${item.path} — ${item.reason || "planned change"}`).join("\n");
+    const preview = plan.actions.map(item => {
+      const suffix = item.truncated ? "\n\n[Preview shortened. The complete file will be written only if approved.]" : "";
+      return "### " + item.path + "\n" + (item.reason || "Planned file change") + "\n\n```text\n" + (item.preview || "") + suffix + "\n```";
+    }).join("\n\n");
+    addMessage("assistant", "**Automation plan ready for review**\n\n" + plan.summary + "\n\n" + preview);
+    const details = plan.actions.map(item => "• " + item.path + " — " + (item.reason || "planned change")).join("\n");
     const approved = window.confirm(
-      `Review automation plan\n\n${plan.summary}\n\n${details}\n\nApply these file changes?`
+      "Review the proposed files shown in the chat.\n\n" + plan.summary + "\n\n" + details + "\n\nApply these file changes?"
     );
     const endpoint = approved
       ? `/api/automation/tasks/${plan.task_id}/approve`
