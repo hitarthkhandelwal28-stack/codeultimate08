@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
   <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -113,6 +114,25 @@
               </select>
               <button type="button" id="automationButton">PLAN &amp; RUN TASK</button>
             </div>
+            <section class="connector-hub" aria-label="Workspace and app integrations">
+              <div class="connector-heading"><span>WORKSPACE ACCESS</span><small id="folderStatus">No local folder selected</small></div>
+              <div class="connector-actions">
+                <button type="button" id="chooseFolder">SELECT LOCAL FOLDER</button>
+                <button type="button" id="importSpreadsheet">IMPORT EXCEL / CSV</button>
+                <button type="button" id="syncFolder" disabled>SYNC PROJECT TO FOLDER</button>
+                <input id="spreadsheetInput" type="file" accept=".csv,.xlsx,.xls" hidden>
+              </div>
+              <div class="connector-grid">
+                <div class="connector-card"><b>GOOGLE DRIVE</b><span>OAuth setup required</span></div>
+                <div class="connector-card"><b>GOOGLE SHEETS</b><span>OAuth setup required</span></div>
+                <div class="connector-card"><b>YOUTUBE</b><span>OAuth + YouTube API required</span></div>
+                <div class="connector-card"><b>EXCEL</b><span>Local CSV / XLSX import enabled</span></div>
+                <div class="connector-card"><b>VS CODE</b><span>Folder sync enabled; desktop bridge needed for direct control</span></div>
+                <div class="connector-card"><b>VERCEL</b><span>API token + secure account setup required</span></div>
+                <div class="connector-card"><b>RENDER</b><span>API token + secure account setup required</span></div>
+              </div>
+              <p class="connector-note">External accounts are not connected yet. CodeAI will never claim access until OAuth or API authorization is configured.</p>
+            </section>
             <div id="uploadList" class="upload-list"></div>
             <form id="composer" class="composer">
               <input type="file" id="fileInput" hidden multiple accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt,.java,.cpp,.c,.h,.cs,.php,.go,.rs,.sql,.yaml,.yml,.toml,.xml,.sh">
