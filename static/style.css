@@ -33,3 +33,19 @@
 .automation-controls button:hover:not(:disabled){background:rgba(0,174,255,.25)}
 .automation-controls button:disabled{opacity:.5;cursor:wait}
 @media(max-width:650px){.automation-controls{gap:6px;padding:7px}.automation-controls label{font-size:6px}.automation-controls select{font-size:10px;padding:7px 4px}.automation-controls button{font-size:7px;padding:8px 6px}}
+
+
+/* workspace and external integration hub */
+.connector-hub{width:100%;max-width:900px;margin:0 auto 9px;padding:10px 11px;border:1px solid rgba(0,174,255,.22);background:rgba(3,20,36,.76)}
+.connector-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;font-family:Orbitron,sans-serif;font-size:8px;letter-spacing:.12em;color:#6edbff}
+.connector-heading small{font-family:inherit;font-size:8px;color:#80a9bd;letter-spacing:0;text-align:right}
+.connector-actions{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0}
+.connector-actions button{background:rgba(0,130,210,.13);border:1px solid rgba(0,174,255,.35);color:#dff8ff;padding:8px 10px;font-family:Orbitron,sans-serif;font-size:8px;letter-spacing:.05em}
+.connector-actions button:hover:not(:disabled){border-color:var(--cyan);background:rgba(0,174,255,.22)}
+.connector-actions button:disabled{opacity:.4;cursor:not-allowed}
+.connector-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.connector-card{min-width:0;display:flex;flex-direction:column;gap:5px;padding:8px;border:1px solid rgba(0,174,255,.16);background:rgba(0,11,23,.5)}
+.connector-card b{font-family:Orbitron,sans-serif;font-size:8px;letter-spacing:.04em;color:#c9efff}
+.connector-card span{font-size:9px;line-height:1.4;color:#789eb4}
+.connector-note{margin:8px 0 0;color:#628aa2;font-size:9px;line-height:1.5}
+@media(max-width:650px){.connector-heading{font-size:7px}.connector-heading small{font-size:7px}.connector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.connector-card{padding:7px}.connector-card b{font-size:7px}.connector-card span{font-size:8px}.connector-actions button{font-size:7px;padding:8px 7px}}
