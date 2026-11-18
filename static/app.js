@@ -199,6 +199,7 @@ async function selectChat(id) {
   selectedUploads = [];
   $("uploadList").innerHTML = "";
   await refreshFiles();
+  await loadAutomationMode();
   $("sidebar").classList.remove("open");
   await loadChats();
 }
@@ -342,3 +343,92 @@ $("downloadZip").onclick = () => {
     toast(err.message);
   }
 })();
+
+
+
+/* ---------- bounded project automation ---------- */
+async function loadAutomationMode() {
+  if (!activeChatId) return;
+  try {
+    const result = await api(`/api/automation/mode?chat_id=${encodeURIComponent(activeChatId)}`);
+    $("automationMode").value = result.mode;
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+$("automationMode").addEventListener("change", async () => {
+  if (!activeChatId) return;
+  try {
+    const result = await api("/api/automation/mode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: activeChatId, mode: $("automationMode").value })
+    });
+    toast(result.mode === "automatic"
+      ? "Automatic mode enabled: new files only"
+      : "Approval mode enabled");
+  } catch (err) {
+    toast(err.message);
+    await loadAutomationMode();
+  }
+});
+
+$("automationButton").addEventListener("click", async () => {
+  const task = promptEl.value.trim();
+  if (!task) {
+    toast("Describe the task in the message box first.");
+    promptEl.focus();
+    return;
+  }
+  if (!activeChatId) await newChat();
+  const button = $("automationButton");
+  button.disabled = true;
+  button.textContent = "PLANNING...";
+  try {
+    const plan = await api("/api/automation/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: activeChatId, task })
+    });
+
+    if (plan.applied) {
+      addMessage("assistant", `**Automation completed.** ${plan.summary}\n\nCreated files:\n${plan.files.map(path => "- `" + path + "`").join("\n")}\n\nAutomatic mode only creates new files; it does not run commands or overwrite existing files.`);
+      promptEl.value = "";
+      await refreshFiles();
+      toast("Automation completed");
+      return;
+    }
+
+    const preview = plan.actions.map(item => {
+      const suffix = item.truncated ? "\n\n[Preview shortened. The complete file will be written only if approved.]" : "";
+      return "### " + item.path + "\n" + (item.reason || "Planned file change") + "\n\n```text\n" + (item.preview || "") + suffix + "\n```";
+    }).join("\n\n");
+    addMessage("assistant", "**Automation plan ready for review**\n\n" + plan.summary + "\n\n" + preview);
+    const details = plan.actions.map(item => "• " + item.path + " — " + (item.reason || "planned change")).join("\n");
+    const approved = window.confirm(
+      "Review the proposed files shown in the chat.\n\n" + plan.summary + "\n\n" + details + "\n\nApply these file changes?"
+    );
+    const endpoint = approved
+      ? `/api/automation/tasks/${plan.task_id}/approve`
+      : `/api/automation/tasks/${plan.task_id}/reject`;
+    const result = await api(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: activeChatId })
+    });
+    if (approved) {
+      addMessage("assistant", `**Approved and applied.**\n\n${plan.summary}\n\nUpdated files:\n${result.files.map(path => "- `" + path + "`").join("\n")}`);
+      promptEl.value = "";
+      await refreshFiles();
+      toast("Approved changes applied");
+    } else {
+      toast("Automation plan rejected; no files changed");
+    }
+  } catch (err) {
+    toast(err.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "PLAN & RUN TASK";
+  }
+});

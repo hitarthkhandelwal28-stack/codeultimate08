@@ -105,6 +105,14 @@
           <button id="scrollBottom" class="scroll-bottom-btn" aria-label="Scroll to latest message" hidden>↓</button>
 
           <div class="composer-wrap">
+            <div class="automation-controls">
+              <label for="automationMode">AUTOMATION MODE</label>
+              <select id="automationMode" aria-label="Automation mode">
+                <option value="approval">Approval required</option>
+                <option value="automatic">Automatic · new files only</option>
+              </select>
+              <button type="button" id="automationButton">PLAN &amp; RUN TASK</button>
+            </div>
             <div id="uploadList" class="upload-list"></div>
             <form id="composer" class="composer">
               <input type="file" id="fileInput" hidden multiple accept=".py,.js,.ts,.jsx,.tsx,.html,.css,.json,.md,.txt,.java,.cpp,.c,.h,.cs,.php,.go,.rs,.sql,.yaml,.yml,.toml,.xml,.sh">
