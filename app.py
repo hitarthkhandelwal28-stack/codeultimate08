@@ -48,7 +48,7 @@ DB_PATH = Path(os.getenv("DATABASE_PATH", str(DB_DIR / "codeai.db")))
 ALLOWED_UPLOADS = {
     ".py", ".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".json",
     ".md", ".txt", ".java", ".cpp", ".c", ".h", ".cs", ".php",
-    ".go", ".rs", ".sql", ".yaml", ".yml", ".toml", ".xml", ".sh"
+    ".go", ".rs", ".sql", ".yaml", ".yml", ".toml", ".xml", ".sh", ".csv"
 }
 MAX_TEXT_CHARS = 12000
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s.]+(?:\.[^@\s.]+)+$")
