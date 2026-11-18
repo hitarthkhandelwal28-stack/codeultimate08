@@ -4,6 +4,7 @@ from datetime import datetime, timezone, timedelta
 from urllib.parse import urlsplit
 import hashlib
 import io
+import json
 import logging
 import os
 import re
@@ -564,9 +565,17 @@ def create_automation_plan():
                     "conflicts": collisions
                 }), 409
             written = safe_write_project_files(WORKSPACE_DIR, chat_id, normalized)
+            task_id = uuid4().hex
+            with db() as conn:
+                conn.execute(
+                    "INSERT INTO automation_tasks(id,chat_id,task,plan_json,status,created_at) "
+                    "VALUES(?,?,?,?,?,?)",
+                    (task_id, chat_id, task, json.dumps(normalized), "applied", now())
+                )
             return jsonify({
                 "mode": mode,
                 "applied": True,
+                "task_id": task_id,
                 "summary": str(plan.get("summary", "Automation completed"))[:500],
                 "files": written
             }), 200
@@ -576,7 +585,7 @@ def create_automation_plan():
             conn.execute(
                 "INSERT INTO automation_tasks(id,chat_id,task,plan_json,status,created_at) "
                 "VALUES(?,?,?,?,?,?)",
-                (task_id, chat_id, task, __import__("json").dumps(normalized),
+                (task_id, chat_id, task, json.dumps(normalized),
                  "pending", now())
             )
         return jsonify({
@@ -584,7 +593,15 @@ def create_automation_plan():
             "applied": False,
             "task_id": task_id,
             "summary": str(plan.get("summary", "Review the proposed changes"))[:500],
-            "actions": [{"path": item["path"], "reason": item["reason"]} for item in normalized]
+            "actions": [
+                {
+                    "path": item["path"],
+                    "reason": item["reason"],
+                    "preview": item["content"][:2500],
+                    "truncated": len(item["content"]) > 2500
+                }
+                for item in normalized
+            ]
         }), 200
     except (ValueError, OSError) as exc:
         return json_error(str(exc), 400)
@@ -610,7 +627,7 @@ def approve_automation_task(task_id):
         ).fetchone()
         if not row or row["status"] != "pending":
             return json_error("Pending automation task not found", 404)
-        actions = __import__("json").loads(row["plan_json"])
+        actions = json.loads(row["plan_json"])
         try:
             written = safe_write_project_files(WORKSPACE_DIR, chat_id, actions)
         except (ValueError, OSError) as exc:
