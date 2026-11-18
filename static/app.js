@@ -432,3 +432,125 @@ $("automationButton").addEventListener("click", async () => {
     button.textContent = "PLAN & RUN TASK";
   }
 });
+
+
+/* ---------- local folder + spreadsheet bridge ---------- */
+let selectedDirectoryHandle = null;
+const LOCAL_TEXT_EXTENSIONS = new Set([".py",".js",".ts",".jsx",".tsx",".html",".css",".json",".md",".txt",".java",".cpp",".c",".h",".cs",".php",".go",".rs",".sql",".yaml",".yml",".toml",".xml",".sh",".csv"]);
+
+function fileExtension(name) {
+  const index = name.lastIndexOf(".");
+  return index >= 0 ? name.slice(index).toLowerCase() : "";
+}
+
+async function uploadTextToChat(name, text) {
+  if (!activeChatId) await newChat();
+  const file = new File([text], name, { type: name.toLowerCase().endsWith(".csv") ? "text/csv" : "text/plain" });
+  const form = new FormData();
+  form.append("file", file);
+  const result = await api(`/api/chats/${activeChatId}/upload`, { method: "POST", body: form });
+  const chip = document.createElement("span");
+  chip.className = "upload-chip";
+  chip.textContent = "✓ " + result.filename;
+  $("uploadList").appendChild(chip);
+}
+
+$("chooseFolder").addEventListener("click", async () => {
+  if (!window.showDirectoryPicker) {
+    toast("Folder access needs a supported Chromium browser over HTTPS or localhost.");
+    return;
+  }
+  try {
+    selectedDirectoryHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+    $("folderStatus").textContent = "Selected: " + selectedDirectoryHandle.name;
+    $("syncFolder").disabled = false;
+    toast("Folder permission granted for this session");
+    const importFolder = window.confirm("Import supported text/code/CSV files from this folder into the current chat?");
+    if (!importFolder) return;
+    if (!activeChatId) await newChat();
+    let imported = 0;
+    let skipped = 0;
+    async function walk(directory, prefix = "") {
+      for await (const entry of directory.values()) {
+        if (imported >= 25) { skipped++; continue; }
+        if (entry.kind === "directory") {
+          await walk(entry, prefix + entry.name + "/");
+        } else if (LOCAL_TEXT_EXTENSIONS.has(fileExtension(entry.name))) {
+          const file = await entry.getFile();
+          if (file.size > 1024 * 1024) { skipped++; continue; }
+          const content = await file.text();
+          await uploadTextToChat(prefix + entry.name, content);
+          imported++;
+        }
+      }
+    }
+    await walk(selectedDirectoryHandle);
+    toast(`Imported ${imported} files${skipped ? "; some files skipped" : ""}`);
+  } catch (err) {
+    if (err.name !== "AbortError") toast("Folder access failed: " + err.message);
+  }
+});
+
+$("importSpreadsheet").addEventListener("click", () => $("spreadsheetInput").click());
+$("spreadsheetInput").addEventListener("change", async event => {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  try {
+    if (!activeChatId) await newChat();
+    let csv;
+    if (fileExtension(file.name) === ".csv") {
+      csv = await file.text();
+    } else {
+      if (!window.XLSX) throw new Error("Spreadsheet parser did not load. Refresh and try again.");
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      csv = workbook.SheetNames.map(name =>
+        "# Sheet: " + name + "\n" + XLSX.utils.sheet_to_csv(workbook.Sheets[name])
+      ).join("\n\n");
+    }
+    if (csv.length > 120000) throw new Error("Spreadsheet is too large to import (120,000 characters maximum).");
+    await uploadTextToChat(file.name.replace(/\.(xlsx|xls)$/i, ".csv"), csv);
+    toast("Spreadsheet imported into chat context");
+  } catch (err) {
+    toast("Spreadsheet import failed: " + err.message);
+  } finally {
+    event.target.value = "";
+  }
+});
+
+async function getOrCreateDirectory(parent, name) {
+  return parent.getDirectoryHandle(name, { create: true });
+}
+
+$("syncFolder").addEventListener("click", async () => {
+  if (!selectedDirectoryHandle || !activeChatId) {
+    toast("Select a local folder and an active chat first.");
+    return;
+  }
+  if (!window.confirm("Sync generated project files into the selected folder? Existing files with matching names may be overwritten.")) return;
+  const button = $("syncFolder");
+  button.disabled = true;
+  button.textContent = "SYNCING...";
+  try {
+    const paths = await api(`/api/chats/${activeChatId}/files`);
+    let written = 0;
+    for (const path of paths) {
+      const result = await api(`/api/chats/${activeChatId}/files/${path.split("/").map(encodeURIComponent).join("/")}`);
+      if (typeof result.content !== "string" || result.content.length > 200000) continue;
+      const parts = path.split("/");
+      const filename = parts.pop();
+      let directory = selectedDirectoryHandle;
+      for (const part of parts) directory = await getOrCreateDirectory(directory, part);
+      const handle = await directory.getFileHandle(filename, { create: true });
+      const writable = await handle.createWritable();
+      await writable.write(result.content);
+      await writable.close();
+      written++;
+    }
+    toast(`Synced ${written} project files to ${selectedDirectoryHandle.name}`);
+  } catch (err) {
+    toast("Folder sync failed: " + err.message);
+  } finally {
+    button.disabled = !selectedDirectoryHandle;
+    button.textContent = "SYNC PROJECT TO FOLDER";
+  }
+});
