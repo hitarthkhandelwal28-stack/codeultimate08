@@ -10,6 +10,8 @@ A local AI coding assistant built with Flask, SQLite, OpenRouter, and vanilla Ja
 - Generate multi-file projects from a natural-language specification
 - Browse and preview generated project files
 - Download generated projects as ZIP archives
+- Permission-based local folder import and project-file sync (supported Chromium browsers)
+- Excel/CSV import: XLSX workbooks are converted to text/CSV context in the browser
 - Workspace path validation and upload extension/size restrictions
 
 ## Requirements
@@ -83,3 +85,12 @@ A local AI coding assistant built with Flask, SQLite, OpenRouter, and vanilla Ja
 - This is a local development app, not a production deployment. Do not expose Flask's development server directly to the internet.
 - The interface loads Markdown and syntax-highlighting libraries from public CDNs. An internet connection is needed for those browser assets.
 - OpenRouter usage may incur costs depending on the selected model and account terms.
+
+
+## Automation connectors
+
+The workspace panel supports a user-selected local folder through the browser File System Access API. CodeAI can import supported text/code/CSV files into the active chat and sync generated project files back to the selected folder after confirmation. Folder access is granted by the browser and is not available to the Render server itself.
+
+Excel/CSV import is available in the browser. XLSX files are converted to CSV text for AI context; this does not preserve workbook formulas, formatting, charts, or macros.
+
+Google Drive, Google Sheets, YouTube, Vercel, and Render are shown as integration targets but are **not connected** by this foundation release. Real account access requires OAuth/API credentials, a secure user identity/session layer, scoped permissions, and server-side token storage. Do not paste API tokens into chat or browser code. VS Code can use the synced folder, but direct editor/terminal control requires a separately installed and authenticated desktop bridge.
