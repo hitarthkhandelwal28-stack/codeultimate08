@@ -14,10 +14,10 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request, send_file
 from werkzeug.utils import secure_filename
 
-from ai_engine import ask_codeai, generate_project
+from ai_engine import ask_codeai, generate_project, plan_automation
 from project_manager import (
     safe_write_project_files, list_project_files, read_project_file,
-    make_project_zip
+    read_all_project_files, validate_relative_path, make_project_zip
 )
 
 load_dotenv()
@@ -102,6 +102,22 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_rate_limits_bucket_time
             ON rate_limits(bucket, created_at);
         CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id, id);
+        CREATE TABLE IF NOT EXISTS automation_modes (
+            chat_id TEXT PRIMARY KEY,
+            mode TEXT NOT NULL CHECK(mode IN ('approval', 'automatic')),
+            FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS automation_tasks (
+            id TEXT PRIMARY KEY,
+            chat_id TEXT NOT NULL,
+            task TEXT NOT NULL,
+            plan_json TEXT NOT NULL,
+            status TEXT NOT NULL CHECK(status IN ('pending', 'applied', 'rejected')),
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(chat_id) REFERENCES chats(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_automation_tasks_chat
+            ON automation_tasks(chat_id, created_at);
         """)
 
 
@@ -453,6 +469,178 @@ def download_project(chat_id):
         as_attachment=True,
         download_name="codeai_project.zip"
     )
+
+
+@app.get("/api/automation/mode")
+def get_automation_mode():
+    chat_id = str(request.args.get("chat_id", ""))
+    if not chat_exists(chat_id):
+        return json_error("Chat not found", 404)
+    with db() as conn:
+        row = conn.execute(
+            "SELECT mode FROM automation_modes WHERE chat_id=?", (chat_id,)
+        ).fetchone()
+    return jsonify({"mode": row["mode"] if row else "approval"})
+
+
+@app.post("/api/automation/mode")
+def set_automation_mode():
+    if not same_origin_or_no_origin():
+        return json_error("Cross-origin request rejected", 403)
+    data = request_data()
+    if data is None:
+        return json_error("Send the request as JSON", 400)
+    chat_id = str(data.get("chat_id", ""))
+    mode = str(data.get("mode", ""))
+    if not chat_exists(chat_id):
+        return json_error("Chat not found", 404)
+    if mode not in ("approval", "automatic"):
+        return json_error("Mode must be approval or automatic", 400)
+    with db() as conn:
+        conn.execute(
+            "INSERT INTO automation_modes(chat_id, mode) VALUES(?, ?) "
+            "ON CONFLICT(chat_id) DO UPDATE SET mode=excluded.mode",
+            (chat_id, mode)
+        )
+    return jsonify({"mode": mode})
+
+
+@app.post("/api/automation/plan")
+def create_automation_plan():
+    if not same_origin_or_no_origin():
+        return json_error("Cross-origin request rejected", 403)
+    if not allow_request("automation-plan", 5, 60):
+        return json_error("Automation request limit reached. Please wait.", 429)
+    data = request_data()
+    if data is None:
+        return json_error("Send the request as JSON", 400)
+    chat_id = str(data.get("chat_id", ""))
+    task = str(data.get("task", "")).strip()
+    if not chat_exists(chat_id):
+        return json_error("Chat not found", 404)
+    if not task or len(task) > 5000:
+        return json_error("Task must be between 1 and 5,000 characters", 400)
+
+    with db() as conn:
+        row = conn.execute(
+            "SELECT mode FROM automation_modes WHERE chat_id=?", (chat_id,)
+        ).fetchone()
+    mode = row["mode"] if row else "approval"
+
+    try:
+        existing_files = read_all_project_files(WORKSPACE_DIR, chat_id)
+        plan = plan_automation(task, existing_files)
+        if not isinstance(plan, dict) or not isinstance(plan.get("actions"), list):
+            return json_error("The AI returned an invalid automation plan", 502)
+        actions = plan["actions"]
+        if not actions or len(actions) > 10:
+            return json_error("Automation plans must contain 1 to 10 file actions", 400)
+
+        normalized = []
+        seen = set()
+        for action in actions:
+            if not isinstance(action, dict) or action.get("type") != "write_file":
+                return json_error("Only project file creation or editing is supported", 400)
+            relative = validate_relative_path(action.get("path")).as_posix()
+            content = action.get("content")
+            if not isinstance(content, str) or len(content) > 40000:
+                return json_error("Each planned file must be text under 40,000 characters", 400)
+            if relative in seen:
+                return json_error("The plan contains duplicate file paths", 400)
+            seen.add(relative)
+            normalized.append({
+                "path": relative,
+                "content": content,
+                "reason": str(action.get("reason", ""))[:300]
+            })
+
+        if mode == "automatic":
+            existing_paths = set(existing_files)
+            collisions = [item["path"] for item in normalized if item["path"] in existing_paths]
+            if collisions:
+                return jsonify({
+                    "error": "Automatic mode only creates new files. Existing files need approval.",
+                    "requires_approval": True,
+                    "conflicts": collisions
+                }), 409
+            written = safe_write_project_files(WORKSPACE_DIR, chat_id, normalized)
+            return jsonify({
+                "mode": mode,
+                "applied": True,
+                "summary": str(plan.get("summary", "Automation completed"))[:500],
+                "files": written
+            }), 200
+
+        task_id = uuid4().hex
+        with db() as conn:
+            conn.execute(
+                "INSERT INTO automation_tasks(id,chat_id,task,plan_json,status,created_at) "
+                "VALUES(?,?,?,?,?,?)",
+                (task_id, chat_id, task, __import__("json").dumps(normalized),
+                 "pending", now())
+            )
+        return jsonify({
+            "mode": mode,
+            "applied": False,
+            "task_id": task_id,
+            "summary": str(plan.get("summary", "Review the proposed changes"))[:500],
+            "actions": [{"path": item["path"], "reason": item["reason"]} for item in normalized]
+        }), 200
+    except (ValueError, OSError) as exc:
+        return json_error(str(exc), 400)
+    except Exception:
+        logger.exception("Automation planning failed")
+        return json_error("Automation planning failed. Check server logs and try again.", 502)
+
+
+@app.post("/api/automation/tasks/<task_id>/approve")
+def approve_automation_task(task_id):
+    if not same_origin_or_no_origin():
+        return json_error("Cross-origin request rejected", 403)
+    data = request_data()
+    if data is None:
+        return json_error("Send the request as JSON", 400)
+    chat_id = str(data.get("chat_id", ""))
+    if not chat_exists(chat_id):
+        return json_error("Chat not found", 404)
+    with db() as conn:
+        row = conn.execute(
+            "SELECT plan_json,status FROM automation_tasks WHERE id=? AND chat_id=?",
+            (task_id, chat_id)
+        ).fetchone()
+        if not row or row["status"] != "pending":
+            return json_error("Pending automation task not found", 404)
+        actions = __import__("json").loads(row["plan_json"])
+        try:
+            written = safe_write_project_files(WORKSPACE_DIR, chat_id, actions)
+        except (ValueError, OSError) as exc:
+            return json_error(str(exc), 400)
+        conn.execute(
+            "UPDATE automation_tasks SET status='applied' WHERE id=? AND chat_id=?",
+            (task_id, chat_id)
+        )
+    return jsonify({"applied": True, "files": written})
+
+
+@app.post("/api/automation/tasks/<task_id>/reject")
+def reject_automation_task(task_id):
+    if not same_origin_or_no_origin():
+        return json_error("Cross-origin request rejected", 403)
+    data = request_data()
+    if data is None:
+        return json_error("Send the request as JSON", 400)
+    chat_id = str(data.get("chat_id", ""))
+    if not chat_exists(chat_id):
+        return json_error("Chat not found", 404)
+    with db() as conn:
+        cursor = conn.execute(
+            "UPDATE automation_tasks SET status='rejected' "
+            "WHERE id=? AND chat_id=? AND status='pending'",
+            (task_id, chat_id)
+        )
+        if cursor.rowcount != 1:
+            return json_error("Pending automation task not found", 404)
+    return jsonify({"rejected": True})
 
 
 @app.errorhandler(413)
