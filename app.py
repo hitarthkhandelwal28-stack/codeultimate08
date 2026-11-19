@@ -20,6 +20,7 @@ from project_manager import (
     safe_write_project_files, list_project_files, read_project_file,
     read_all_project_files, validate_relative_path, make_project_zip
 )
+from plugin_manager import plugin_bp
 
 load_dotenv()
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
@@ -670,6 +671,8 @@ def internal_error(_error):
     logger.exception("Unhandled server error")
     return json_error("An unexpected server error occurred. Please try again later.", 500)
 
+
+app.register_blueprint(plugin_bp)
 
 init_db()
 
