@@ -21,6 +21,7 @@ from project_manager import (
     read_all_project_files, validate_relative_path, make_project_zip
 )
 from plugin_manager import plugin_bp
+from code_library import LANGUAGES, RECIPES
 
 load_dotenv()
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
@@ -677,6 +678,12 @@ def reject_automation_task(task_id):
         if cursor.rowcount != 1:
             return json_error("Pending automation task not found", 404)
     return jsonify({"rejected": True})
+
+
+@app.get("/api/code-library")
+def code_library():
+    """Return the built-in recipe catalog and supported language names."""
+    return jsonify({"languages": LANGUAGES, "recipes": RECIPES})
 
 
 @app.errorhandler(413)

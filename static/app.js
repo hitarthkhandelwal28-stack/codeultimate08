@@ -790,3 +790,84 @@ $("pluginCards").addEventListener("click", async event => {
     await loadPluginStatuses();
   }
 });
+
+
+/* ---------- 100-recipe code library ---------- */
+const codeLibraryOverlay = $("codeLibraryOverlay");
+let codeLibraryCatalog = null;
+
+function closeCodeLibrary() {
+  codeLibraryOverlay.hidden = true;
+  document.body.classList.remove("plugin-open");
+}
+
+function renderCodeLibrary() {
+  const query = $("codeLibrarySearch").value.trim().toLowerCase();
+  const list = $("codeLibraryList");
+  const matches = (codeLibraryCatalog?.recipes || []).filter((recipe, index) =>
+    recipe.toLowerCase().includes(query) || String(index + 1).includes(query)
+  );
+  list.innerHTML = "";
+  if (!matches.length) {
+    list.innerHTML = '<p class="empty-files">No matching recipes found.</p>';
+    return;
+  }
+  matches.forEach(recipe => {
+    const originalIndex = codeLibraryCatalog.recipes.indexOf(recipe);
+    const item = document.createElement("article");
+    item.className = "code-recipe";
+    const title = document.createElement("div");
+    title.className = "code-recipe-title";
+    title.innerHTML = '<span>' + String(originalIndex + 1).padStart(3, "0") + '</span><strong></strong>';
+    title.querySelector("strong").textContent = recipe;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "GENERATE";
+    button.addEventListener("click", async () => {
+      const language = $("codeLibraryLanguage").value;
+      const prompt = "Write a complete, beginner-friendly " + language + " solution for: " + recipe +
+        ". Include clear comments, explain how it works, and show how to run or use it. " +
+        "Use safe input handling and standard-library features where practical. Return the code in a fenced code block.";
+      closeCodeLibrary();
+      promptEl.value = prompt;
+      await sendMessage(prompt);
+      promptEl.value = "";
+    });
+    item.append(title, button);
+    list.appendChild(item);
+  });
+}
+
+async function openCodeLibrary() {
+  codeLibraryOverlay.hidden = false;
+  document.body.classList.add("plugin-open");
+  if (!codeLibraryCatalog) {
+    try {
+      codeLibraryCatalog = await api("/api/code-library");
+      const select = $("codeLibraryLanguage");
+      select.innerHTML = "";
+      codeLibraryCatalog.languages.forEach(language => {
+        const option = document.createElement("option");
+        option.value = language;
+        option.textContent = language;
+        select.appendChild(option);
+      });
+    } catch (err) {
+      closeCodeLibrary();
+      toast("Could not load code library: " + err.message);
+      return;
+    }
+  }
+  renderCodeLibrary();
+}
+
+$("codeLibraryOpen").addEventListener("click", openCodeLibrary);
+$("codeLibraryClose").addEventListener("click", closeCodeLibrary);
+$("codeLibraryLanguage").addEventListener("change", renderCodeLibrary);
+$("codeLibrarySearch").addEventListener("input", renderCodeLibrary);
+codeLibraryOverlay.addEventListener("click", event => {
+  if (event.target === codeLibraryOverlay) closeCodeLibrary();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !codeLibraryOverlay.hidden) closeCodeLibrary();
+});
