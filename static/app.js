@@ -229,20 +229,96 @@ async function refreshFiles() {
   });
 }
 
+function requestedFilename(message) {
+  const match = message.match(/\\b(?:[a-zA-Z0-9_-]+\\/)*[a-zA-Z0-9_-]+\\.(?:html?|css|js|jsx|tsx|ts|py|json|md|txt|java|cpp|c|h|cs|php|go|rs|sql|ya?ml|toml|xml|sh|csv)\\b/i);
+  return match ? match[0].split("/").pop() : null;
+}
+
+function isFileCreationRequest(message) {
+  return /\\b(create|make|generate|write|save)\\b/i.test(message)
+    && /\\b(file|index\\.html|\\w+\\.(html?|css|js|py|json|md|txt))\\b/i.test(message)
+    && Boolean(requestedFilename(message));
+}
+
+async function generateRequestedFile(message) {
+  const expectedName = requestedFilename(message);
+  const plan = await api("/api/automation/plan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: activeChatId, task:
+      "Create the requested file. The exact required filename is " + expectedName +
+      ". Create this file in the current project workspace. Do not substitute another filename.\n\nUser request:\n" + message
+    })
+  });
+
+  if (plan.applied) {
+    if (!plan.files.some(path => path.split("/").pop() === expectedName)) {
+      addMessage("assistant", "**File generation stopped:** the planner did not create the exact requested filename.");
+      return;
+    }
+    addMessage("assistant", "**File created successfully:** `" + expectedName +
+      "`\n\nSaved in the Project Files panel. Select it to preview, or use Export ZIP to download it.");
+    await refreshFiles();
+    await loadChats();
+    toast(expectedName + " created");
+    return;
+  }
+
+  if (!Array.isArray(plan.actions) || !plan.actions.some(item => item.path.split("/").pop() === expectedName)) {
+    await api("/api/automation/tasks/" + plan.task_id + "/reject", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: activeChatId })
+    });
+    addMessage("assistant", "**File generation stopped:** the AI did not return the exact filename `" + expectedName + "`. No file was saved.");
+    return;
+  }
+
+  const preview = plan.actions.map(item =>
+    "### " + item.path + "\n" + (item.reason || "Generated file") +
+    "\n\n```text\n" + (item.preview || "") +
+    (item.truncated ? "\n[Preview shortened]" : "") + "\n```"
+  ).join("\n\n");
+  addMessage("assistant", "**File ready for approval**\n\n" + plan.summary + "\n\n" + preview);
+  const approved = window.confirm(
+    "Approve file generation?\n\n" + plan.actions.map(item => item.path).join("\n") +
+    "\n\nIf a file already exists, approving may replace its contents."
+  );
+  const endpoint = approved
+    ? "/api/automation/tasks/" + plan.task_id + "/approve"
+    : "/api/automation/tasks/" + plan.task_id + "/reject";
+  const result = await api(endpoint, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: activeChatId })
+  });
+  if (approved) {
+    addMessage("assistant", "**File generated:** " + result.files.map(path => "`" + path + "`").join(", ") +
+      "\n\nYou can preview it in Project Files or download the project ZIP.");
+    await refreshFiles();
+    await loadChats();
+    toast(expectedName + " saved");
+  } else {
+    addMessage("assistant", "File generation cancelled. No files were changed.");
+  }
+}
+
 async function sendMessage(message) {
   if (!activeChatId) await newChat();
-  autoFollow = true;                     // sending always re-engages following
+  autoFollow = true;
   addMessage("user", message);
   scrollToBottom(true);
   $("sendButton").disabled = true;
   try {
-    const result = await api("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: activeChatId, message })
-    });
-    addMessage("assistant", result.reply);
-    await loadChats();
+    if (isFileCreationRequest(message)) {
+      await generateRequestedFile(message);
+    } else {
+      const result = await api("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: activeChatId, message })
+      });
+      addMessage("assistant", result.reply);
+      await loadChats();
+    }
   } catch (err) {
     addMessage("assistant", `**Error:** ${err.message}`);
   } finally {
