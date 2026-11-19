@@ -242,14 +242,35 @@ function isFileCreationRequest(message) {
 
 async function generateRequestedFile(message) {
   const expectedName = requestedFilename(message);
-  const plan = await api("/api/automation/plan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: activeChatId, task:
-      "Create the requested file. The exact required filename is " + expectedName +
-      ". Create this file in the current project workspace. Do not substitute another filename.\n\nUser request:\n" + message
-    })
-  });
+  const modeState = await api(`/api/automation/mode?chat_id=${encodeURIComponent(activeChatId)}`);
+  const restoreAutomatic = modeState.mode === "automatic";
+  if (restoreAutomatic) {
+    await api("/api/automation/mode", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: activeChatId, mode: "approval" })
+    });
+  }
+
+  let plan;
+  try {
+    plan = await api("/api/automation/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: activeChatId, task:
+        "Create only the requested file. The exact required filename is " + expectedName +
+        ". Create this file in the current project workspace. Do not substitute another filename.\n\nUser request:\n" + message
+      })
+    });
+  } finally {
+    if (restoreAutomatic) {
+      await api("/api/automation/mode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: activeChatId, mode: "automatic" })
+      });
+    }
+  }
 
   if (plan.applied) {
     if (!plan.files.some(path => path.split("/").pop() === expectedName)) {
