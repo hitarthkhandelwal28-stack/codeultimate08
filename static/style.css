@@ -49,3 +49,38 @@
 .connector-card span{font-size:9px;line-height:1.4;color:#789eb4}
 .connector-note{margin:8px 0 0;color:#628aa2;font-size:9px;line-height:1.5}
 @media(max-width:650px){.connector-heading{font-size:7px}.connector-heading small{font-size:7px}.connector-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.connector-card{padding:7px}.connector-card b{font-size:7px}.connector-card span{font-size:8px}.connector-actions button{font-size:7px;padding:8px 7px}}
+
+
+/* ---------- plugin manager overlay ---------- */
+.plugin-nav{width:100%;text-align:left;cursor:pointer;font:inherit}
+.plugin-overlay{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:18px;background:rgba(0,5,13,.82);backdrop-filter:blur(9px)}
+.plugin-overlay[hidden]{display:none}
+.plugin-window{width:min(760px,100%);max-height:min(88vh,850px);overflow:auto;padding:22px;background:linear-gradient(145deg,#071b30,#020b16);border:1px solid rgba(0,190,255,.42);box-shadow:0 0 40px rgba(0,145,255,.2);color:#d9f3ff}
+.plugin-window-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid rgba(0,174,255,.2);padding-bottom:17px}
+.plugin-window-head h2{font-family:Orbitron,sans-serif;font-size:17px;letter-spacing:.1em;margin:7px 0}
+.plugin-window-head p{font-size:11px;color:#80a9bd;margin:0}
+.plugin-close{width:34px;height:34px;border:1px solid rgba(0,174,255,.3);background:rgba(0,110,180,.12);color:#bdefff;font-size:23px}
+.plugin-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:16px 0 10px;font:9px Orbitron,sans-serif;letter-spacing:.1em;color:#70d9fa}
+.plugin-toolbar button,.plugin-card>button{border:1px solid rgba(0,174,255,.38);background:rgba(0,125,200,.15);color:#dff8ff;padding:8px 10px;font:8px Orbitron,sans-serif;letter-spacing:.06em}
+.plugin-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.plugin-card{min-width:0;padding:14px;border:1px solid rgba(0,174,255,.22);background:rgba(0,13,27,.7)}
+.plugin-card-top{display:flex;align-items:center;gap:10px}
+.plugin-logo{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:10px;background:rgba(225,50,70,.12);border:1px solid rgba(255,75,90,.38);color:#ff687b;font:bold 14px Orbitron,sans-serif}
+.render-logo{font-size:20px}
+.plugin-card h3{margin:0 0 3px;font:12px Orbitron,sans-serif;color:#e5f8ff}
+.plugin-card-top small{font-size:9px;color:#7198ae}
+.plugin-status{margin-left:auto;padding:5px 6px;border:1px solid rgba(255,190,90,.3);color:#e8bd7d;font:7px Orbitron,sans-serif;white-space:nowrap}
+.plugin-status.is-configured{border-color:rgba(0,220,160,.3);color:#70e4bc}
+.plugin-card p{min-height:36px;color:#8baec1;font-size:10px;line-height:1.5}
+.plugin-card>button{width:100%}
+.plugin-card>button:disabled{opacity:.55}
+.plugin-result{display:block;min-height:28px;margin-top:9px;color:#789db2;font-size:9px;line-height:1.5;overflow-wrap:anywhere}
+.plugin-result.plugin-success{color:#73e2b8}
+.plugin-setup{margin-top:14px;padding:13px;border:1px solid rgba(0,174,255,.18);background:rgba(0,9,20,.55)}
+.plugin-setup h3{margin:0 0 8px;color:#6edbff;font:9px Orbitron,sans-serif;letter-spacing:.1em}
+.plugin-setup p{font-size:10px;line-height:1.6;color:#8eafc1}
+.plugin-setup>div{display:flex;gap:7px;flex-wrap:wrap}
+.plugin-setup code{padding:6px 8px;background:#03101d;border:1px solid rgba(0,174,255,.2);color:#a8eaff;font-size:10px}
+.plugin-security-note{margin-bottom:0;color:#d5b98b!important}
+body.plugin-open{overflow:hidden}
+@media(max-width:600px){.plugin-overlay{padding:8px}.plugin-window{padding:15px;max-height:94vh}.plugin-cards{grid-template-columns:1fr}.plugin-card p{min-height:0}.plugin-window-head h2{font-size:14px}}
