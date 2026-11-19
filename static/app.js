@@ -169,6 +169,38 @@ async function api(url, options = {}) {
   return data;
 }
 
+async function downloadFile(url, fallbackName) {
+  const response = await fetch(url, { credentials: "same-origin" });
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type") || "";
+    let message = `Download failed (HTTP ${response.status}).`;
+    if (contentType.includes("application/json")) {
+      const data = await response.json().catch(() => ({}));
+      message = data.error || message;
+    }
+    throw new Error(message);
+  }
+
+  const blob = await response.blob();
+  if (!blob.size) throw new Error("The server returned an empty file.");
+
+  const disposition = response.headers.get("content-disposition") || "";
+  const match = disposition.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+  const filename = match
+    ? decodeURIComponent(match[1] || match[2])
+    : fallbackName;
+
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = filename || fallbackName || "download";
+  link.style.display = "none";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+}
+
 async function loadChats() {
   const chats = await api("/api/chats");
   const list = $("chatList");
@@ -229,14 +261,26 @@ async function refreshFiles() {
       } catch (err) { toast(err.message); }
     };
 
-    const downloadLink = document.createElement("a");
-    downloadLink.className = "file-download-button";
-    downloadLink.textContent = "↓ DOWNLOAD";
-    downloadLink.href = `/api/chats/${encodeURIComponent(activeChatId)}/file-download?path=${encodeURIComponent(path)}`;
-    downloadLink.setAttribute("download", path.split("/").pop());
-    downloadLink.addEventListener("click", () => toast("Starting download..."));
+    const downloadButton = document.createElement("button");
+    downloadButton.type = "button";
+    downloadButton.className = "file-download-button";
+    downloadButton.textContent = "↓ DOWNLOAD";
+    downloadButton.addEventListener("click", async () => {
+      downloadButton.disabled = true;
+      downloadButton.textContent = "DOWNLOADING...";
+      try {
+        const url = `/api/chats/${encodeURIComponent(activeChatId)}/file-download?path=${encodeURIComponent(path)}`;
+        await downloadFile(url, path.split("/").pop());
+        toast("Download started: " + path.split("/").pop());
+      } catch (err) {
+        toast(err.message);
+      } finally {
+        downloadButton.disabled = false;
+        downloadButton.textContent = "↓ DOWNLOAD";
+      }
+    });
 
-    row.append(previewButton, downloadLink);
+    row.append(previewButton, downloadButton);
     $("fileTree").appendChild(row);
   });
 }
@@ -439,8 +483,18 @@ $("generateProject").onclick = async () => {
   }
 };
 
-$("downloadZip").onclick = () => {
-  if (activeChatId) window.location.href = `/api/chats/${activeChatId}/download`;
+$("downloadZip").onclick = async () => {
+  if (!activeChatId) return;
+  const button = $("downloadZip");
+  button.disabled = true;
+  try {
+    await downloadFile(`/api/chats/${encodeURIComponent(activeChatId)}/download`, "codeai_project.zip");
+    toast("Project ZIP download started");
+  } catch (err) {
+    toast(err.message);
+  } finally {
+    button.disabled = false;
+  }
 };
 
 (async function init() {
