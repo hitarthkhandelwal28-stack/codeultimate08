@@ -216,16 +216,28 @@ async function refreshFiles() {
   }
   $("downloadZip").disabled = false;
   files.forEach(path => {
-    const button = document.createElement("button");
-    button.className = "file-button";
-    button.textContent = "▤  " + path;
-    button.onclick = async () => {
+    const row = document.createElement("div");
+    row.className = "file-entry";
+
+    const previewButton = document.createElement("button");
+    previewButton.className = "file-button";
+    previewButton.textContent = "▤  " + path;
+    previewButton.onclick = async () => {
       try {
         const result = await api(`/api/chats/${activeChatId}/files/${path.split("/").map(encodeURIComponent).join("/")}`);
         $("filePreview").textContent = result.content;
       } catch (err) { toast(err.message); }
     };
-    $("fileTree").appendChild(button);
+
+    const downloadLink = document.createElement("a");
+    downloadLink.className = "file-download-button";
+    downloadLink.textContent = "↓ DOWNLOAD";
+    downloadLink.href = `/api/chats/${encodeURIComponent(activeChatId)}/file-download?path=${encodeURIComponent(path)}`;
+    downloadLink.setAttribute("download", path.split("/").pop());
+    downloadLink.addEventListener("click", () => toast("Starting download..."));
+
+    row.append(previewButton, downloadLink);
+    $("fileTree").appendChild(row);
   });
 }
 
