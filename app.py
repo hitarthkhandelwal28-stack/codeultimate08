@@ -458,6 +458,24 @@ def project_file_content(chat_id, relative_path):
         return json_error("File not found", 404)
 
 
+@app.get("/api/chats/<chat_id>/file-download")
+def download_project_file(chat_id):
+    if not chat_exists(chat_id):
+        return json_error("Chat not found", 404)
+    relative_path = request.args.get("path", "")
+    try:
+        content = read_project_file(WORKSPACE_DIR, chat_id, relative_path)
+    except (ValueError, FileNotFoundError):
+        return json_error("File not found", 404)
+    filename = Path(relative_path).name
+    return send_file(
+        io.BytesIO(content.encode("utf-8")),
+        mimetype="application/octet-stream",
+        as_attachment=True,
+        download_name=filename
+    )
+
+
 @app.get("/api/chats/<chat_id>/download")
 def download_project(chat_id):
     if not chat_exists(chat_id):
