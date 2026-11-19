@@ -90,3 +90,19 @@ body.plugin-open{overflow:hidden}
 .file-entry .file-button{flex:1;min-width:0}
 .file-download-button{flex:0 0 auto;padding:7px 8px;border:1px solid rgba(0,174,255,.28);color:var(--cyan);font-size:9px;text-decoration:none;white-space:nowrap}
 .file-download-button:hover{background:rgba(0,174,255,.12);border-color:var(--cyan);color:white}
+
+
+/* ---------- code recipe library ---------- */
+.code-library-window{width:min(820px,100%)}
+.code-library-controls{display:grid;grid-template-columns:auto minmax(130px,1fr) minmax(180px,1.4fr);gap:9px;align-items:center;margin:16px 0 10px}
+.code-library-controls label,.code-library-footer{font:8px Orbitron,sans-serif;letter-spacing:.1em;color:#70d9fa}
+.code-library-controls select,.code-library-controls input{min-width:0;width:100%;padding:9px 10px;background:#061a2d;border:1px solid rgba(0,174,255,.32);color:#e5faff;font-size:11px}
+.code-library-note{font-size:10px;line-height:1.5;color:#8baec1}
+.code-library-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:52vh;overflow:auto;padding:2px}
+.code-recipe{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:9px;border:1px solid rgba(0,174,255,.18);background:rgba(0,11,23,.6)}
+.code-recipe-title{display:flex;align-items:center;gap:8px;min-width:0}
+.code-recipe-title span{font:8px Orbitron,sans-serif;color:#4e9dbb}
+.code-recipe-title strong{font-size:10px;font-weight:500;color:#d9f3ff;line-height:1.35}
+.code-recipe button{flex:0 0 auto;padding:7px 8px;border:1px solid rgba(0,174,255,.38);background:rgba(0,125,200,.15);color:#dff8ff;font:7px Orbitron,sans-serif}
+.code-library-footer{display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:7px;color:#6798ae}
+@media(max-width:600px){.code-library-controls{grid-template-columns:1fr 1fr}.code-library-controls label{grid-column:1/-1}.code-library-controls input{grid-column:1/-1}.code-library-list{grid-template-columns:1fr;max-height:56vh}.code-library-footer{flex-direction:column}}
