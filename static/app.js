@@ -554,3 +554,76 @@ $("syncFolder").addEventListener("click", async () => {
     button.textContent = "SYNC PROJECT TO FOLDER";
   }
 });
+
+
+/* ---------- plugin manager: GitHub + Render ---------- */
+const pluginManagerEl = $("pluginManager");
+
+function openPluginManager() {
+  pluginManagerEl.hidden = false;
+  document.body.classList.add("plugin-open");
+  loadPluginStatuses();
+}
+
+function closePluginManager() {
+  pluginManagerEl.hidden = true;
+  document.body.classList.remove("plugin-open");
+}
+
+$("pluginManagerOpen").addEventListener("click", openPluginManager);
+$("pluginManagerClose").addEventListener("click", closePluginManager);
+pluginManagerEl.addEventListener("click", event => {
+  if (event.target === pluginManagerEl) closePluginManager();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !pluginManagerEl.hidden) closePluginManager();
+});
+
+async function loadPluginStatuses() {
+  const cards = $("pluginCards");
+  try {
+    const result = await api("/api/plugins");
+    result.plugins.forEach(plugin => {
+      const button = cards.querySelector('[data-test-plugin="' + plugin.id + '"]');
+      const card = button && button.closest(".plugin-card");
+      if (!card) return;
+      const status = card.querySelector(".plugin-status");
+      const detail = card.querySelector(".plugin-result");
+      status.textContent = plugin.configured ? "CONFIGURED" : "SETUP REQUIRED";
+      status.classList.toggle("is-configured", plugin.configured);
+      detail.textContent = plugin.configured
+        ? "Server credential found. Test the connection to verify it."
+        : "Add " + (plugin.id === "github" ? "GITHUB_TOKEN" : "RENDER_API_KEY") + " to server environment variables.";
+    });
+  } catch (err) {
+    toast("Could not load plugins: " + err.message);
+  }
+}
+
+$("refreshPlugins").addEventListener("click", loadPluginStatuses);
+
+$("pluginCards").addEventListener("click", async event => {
+  const button = event.target.closest("[data-test-plugin]");
+  if (!button) return;
+  const pluginId = button.dataset.testPlugin;
+  const resultEl = $(pluginId + "PluginResult");
+  button.disabled = true;
+  button.textContent = "TESTING...";
+  resultEl.textContent = "Checking provider connection…";
+  resultEl.classList.remove("plugin-success");
+  try {
+    const result = await api("/api/plugins/" + pluginId + "/test", { method: "POST" });
+    resultEl.textContent = result.account
+      ? "Connected as " + result.account + ". " + result.message
+      : result.message;
+    resultEl.classList.add("plugin-success");
+    toast(pluginId + " connected");
+  } catch (err) {
+    resultEl.textContent = err.message;
+    toast(pluginId + " connection failed");
+  } finally {
+    button.disabled = false;
+    button.textContent = "TEST CONNECTION";
+    await loadPluginStatuses();
+  }
+});
