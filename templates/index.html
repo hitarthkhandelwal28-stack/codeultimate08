@@ -28,6 +28,7 @@
         <div class="module-item active"><span class="module-icon">⌘</span><span>AI Command Center</span><i></i></div>
         <div class="module-item"><span class="module-icon">⌁</span><span>Code Intelligence</span></div>
         <div class="module-item"><span class="module-icon">▤</span><span>Project Explorer</span></div>
+        <button id="pluginManagerOpen" class="module-item plugin-nav" type="button"><span class="module-icon">⌘</span><span>Plugin Manager</span><i></i></button>
       </div>
       <div class="side-label chat-label">CONVERSATION LOG</div>
       <div id="chatList" class="chat-list"></div>
@@ -155,6 +156,25 @@
       </section>
     </main>
   </div>
+  <section id="pluginManager" class="plugin-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="pluginManagerTitle">
+    <div class="plugin-window">
+      <header class="plugin-window-head">
+        <div><span class="eyebrow">CODEAI EXTENSIONS</span><h2 id="pluginManagerTitle">PLUGIN MANAGER</h2><p>Connect developer tools. Credentials remain on the server.</p></div>
+        <button id="pluginManagerClose" class="plugin-close" type="button" aria-label="Close plugin manager">×</button>
+      </header>
+      <div class="plugin-toolbar"><span>AVAILABLE INTEGRATIONS</span><button id="refreshPlugins" type="button">REFRESH STATUS</button></div>
+      <div id="pluginCards" class="plugin-cards">
+        <article class="plugin-card"><div class="plugin-card-top"><span class="plugin-logo github-logo">GH</span><div><h3>GitHub</h3><small>Repository integration</small></div><span class="plugin-status">CHECKING</span></div><p>Verify your GitHub account connection. Read-only integration in this release.</p><button type="button" data-test-plugin="github">TEST CONNECTION</button><small class="plugin-result" id="githubPluginResult">Checking configuration…</small></article>
+        <article class="plugin-card"><div class="plugin-card-top"><span class="plugin-logo render-logo">R</span><div><h3>Render</h3><small>Hosting integration</small></div><span class="plugin-status">CHECKING</span></div><p>Verify your Render API connection. Read-only integration in this release.</p><button type="button" data-test-plugin="render">TEST CONNECTION</button><small class="plugin-result" id="renderPluginResult">Checking configuration…</small></article>
+      </div>
+      <section class="plugin-setup">
+        <h3>SERVER CONFIGURATION</h3>
+        <p>Add these environment variable names in your Render service → Environment. For local development, use a private <code>.env</code> file.</p>
+        <div><code>GITHUB_TOKEN</code><code>RENDER_API_KEY</code></div>
+        <p class="plugin-security-note">Never paste API keys into chat, browser code, or GitHub. Do not commit your .env file. Use read-only access where supported.</p>
+      </section>
+    </div>
+  </section>
   <div id="toast" class="toast" role="status"></div>
   <script>
     (() => {
