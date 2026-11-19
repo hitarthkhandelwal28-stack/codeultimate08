@@ -84,3 +84,9 @@
 .plugin-security-note{margin-bottom:0;color:#d5b98b!important}
 body.plugin-open{overflow:hidden}
 @media(max-width:600px){.plugin-overlay{padding:8px}.plugin-window{padding:15px;max-height:94vh}.plugin-cards{grid-template-columns:1fr}.plugin-card p{min-height:0}.plugin-window-head h2{font-size:14px}}
+
+
+.file-entry{display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(0,174,255,.09);padding:2px 0}
+.file-entry .file-button{flex:1;min-width:0}
+.file-download-button{flex:0 0 auto;padding:7px 8px;border:1px solid rgba(0,174,255,.28);color:var(--cyan);font-size:9px;text-decoration:none;white-space:nowrap}
+.file-download-button:hover{background:rgba(0,174,255,.12);border-color:var(--cyan);color:white}
