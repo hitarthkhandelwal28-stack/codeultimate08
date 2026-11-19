@@ -230,13 +230,13 @@ async function refreshFiles() {
 }
 
 function requestedFilename(message) {
-  const match = message.match(/\\b(?:[a-zA-Z0-9_-]+\\/)*[a-zA-Z0-9_-]+\\.(?:html?|css|js|jsx|tsx|ts|py|json|md|txt|java|cpp|c|h|cs|php|go|rs|sql|ya?ml|toml|xml|sh|csv)\\b/i);
+  const match = message.match(/\b(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:html?|css|js|jsx|tsx|ts|py|json|md|txt|java|cpp|c|h|cs|php|go|rs|sql|ya?ml|toml|xml|sh|csv)\b/i);
   return match ? match[0].split("/").pop() : null;
 }
 
 function isFileCreationRequest(message) {
-  return /\\b(create|make|generate|write|save)\\b/i.test(message)
-    && /\\b(file|index\\.html|\\w+\\.(html?|css|js|py|json|md|txt))\\b/i.test(message)
+  return /\b(create|make|generate|write|save)\b/i.test(message)
+    && /\b(file|index\.html|\w+\.(html?|css|js|py|json|md|txt))\b/i.test(message)
     && Boolean(requestedFilename(message));
 }
 
