@@ -5,6 +5,8 @@ import re
 
 import requests
 
+from code_library import LANGUAGES, RECIPES
+
 
 BASE_DIR = Path(__file__).resolve().parent
 KNOWLEDGE_DIR = BASE_DIR / "knowledge"
@@ -27,6 +29,7 @@ Requirements:
 - Never suggest running unknown code with administrator/root privileges.
 - When reviewing code, identify strengths, bugs, security risks, and practical improvements.
 - When changing an existing project, preserve its current architecture and UI unless asked otherwise.
+- Code Library help: When users ask about CodeAI features, coding examples, reusable recipes, or how to get started, explain the searchable Code Library. Tell them to open Code Library from the left sidebar, choose a programming language, search or browse a recipe, then press GENERATE to send it to their connected AI model. Explain that recipes are prompts/templates for generating code, not pre-written or pre-tested executable files. Remind users to review and test generated code; AI provider usage may consume API credits. Do not mention the library in unrelated answers.
 """
 
 
@@ -89,6 +92,15 @@ def _request(messages, temperature=0.2, max_tokens=7000):
 
 def ask_codeai(history, upload_context=""):
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages.append({
+        "role": "system",
+        "content": (
+            "Current Code Library facts (use these exact values when explaining the feature):\n"
+            f"- Recipes: {len(RECIPES)}\n"
+            f"- Programming languages: {len(LANGUAGES)}\n"
+            f"- Languages: {", ".join(LANGUAGES)}"
+        )
+    })
     if _needs_python_gui_knowledge(history, upload_context):
         reference = _python_gui_knowledge()
         if reference:
