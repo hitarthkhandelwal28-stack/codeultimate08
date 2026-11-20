@@ -13,7 +13,20 @@ LANGUAGES = [
     "Go",
     "Rust",
     "HTML",
-    "CSS"
+    "CSS",
+    "SQL",
+    "Ruby",
+    "Kotlin",
+    "Swift",
+    "Dart",
+    "R",
+    "MATLAB",
+    "Bash",
+    "PowerShell",
+    "Scala",
+    "Perl",
+    "Lua",
+    "Elixir"
 ]
 
 RECIPES = [
@@ -118,3 +131,8 @@ RECIPES = [
     "Tic-tac-toe logic",
     "Simple command-line menu"
 ]
+
+from code_library_extra import EXTRA_RECIPES
+
+# Keep the original beginner recipes and add 900 more searchable recipe prompts.
+RECIPES.extend(EXTRA_RECIPES)
