@@ -792,7 +792,7 @@ $("pluginCards").addEventListener("click", async event => {
 });
 
 
-/* ---------- 100-recipe code library ---------- */
+/* ---------- 1000-recipe multi-language code library ---------- */
 const codeLibraryOverlay = $("codeLibraryOverlay");
 let codeLibraryCatalog = null;
 
@@ -844,6 +844,12 @@ async function openCodeLibrary() {
   if (!codeLibraryCatalog) {
     try {
       codeLibraryCatalog = await api("/api/code-library");
+      const count = codeLibraryCatalog.recipes.length;
+      const languageCount = codeLibraryCatalog.languages.length;
+      $("codeLibraryOpen").querySelector("span:nth-child(2)").textContent = `Code Library · ${count.toLocaleString()} recipes`;
+      $("codeLibraryTitle").nextElementSibling.textContent = `${count.toLocaleString()} coding recipes · ${languageCount} programming languages`;
+      $("codeLibrarySearch").placeholder = `Search ${count.toLocaleString()} recipes...`;
+      $("codeLibraryOverlay").querySelector(".code-library-footer span").textContent = `${count.toLocaleString()} RECIPES AVAILABLE FOR EACH LANGUAGE`;
       const select = $("codeLibraryLanguage");
       select.innerHTML = "";
       codeLibraryCatalog.languages.forEach(language => {
