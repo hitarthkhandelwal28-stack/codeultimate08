@@ -134,5 +134,5 @@ RECIPES = [
 
 from code_library_extra import EXTRA_RECIPES
 
-# Keep the original beginner recipes and add 1 more searchable recipe prompts.
+# Keep the original beginner recipes and add 930 more searchable recipe prompts.
 RECIPES.extend(EXTRA_RECIPES)
