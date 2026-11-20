@@ -98,7 +98,7 @@ def ask_codeai(history, upload_context=""):
             "Current Code Library facts (use these exact values when explaining the feature):\n"
             f"- Recipes: {len(RECIPES)}\n"
             f"- Programming languages: {len(LANGUAGES)}\n"
-            f"- Languages: {", ".join(LANGUAGES)}"
+            f"- Languages: {', '.join(LANGUAGES)}"
         )
     })
     if _needs_python_gui_knowledge(history, upload_context):
