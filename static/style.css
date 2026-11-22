@@ -106,3 +106,9 @@ body.plugin-open{overflow:hidden}
 .code-recipe button{flex:0 0 auto;padding:7px 8px;border:1px solid rgba(0,174,255,.38);background:rgba(0,125,200,.15);color:#dff8ff;font:7px Orbitron,sans-serif}
 .code-library-footer{display:flex;justify-content:space-between;gap:8px;margin-top:12px;font-size:7px;color:#6798ae}
 @media(max-width:600px){.code-library-controls{grid-template-columns:1fr 1fr}.code-library-controls label{grid-column:1/-1}.code-library-controls input{grid-column:1/-1}.code-library-list{grid-template-columns:1fr;max-height:56vh}.code-library-footer{flex-direction:column}}
+
+/* Auto Debug composer action */
+.auto-debug-button{flex:0 0 auto;padding:9px 10px;border:1px solid rgba(0,220,180,.45);background:rgba(0,175,140,.13);color:#a8ffe9;font:8px Orbitron,sans-serif;letter-spacing:.06em;white-space:nowrap;cursor:pointer}
+.auto-debug-button:hover:not(:disabled){border-color:#62eecb;background:rgba(0,200,160,.22);color:#e4fff7}
+.auto-debug-button:disabled{opacity:.55;cursor:wait}
+@media(max-width:650px){.auto-debug-button{font-size:7px;padding:8px 6px}}
