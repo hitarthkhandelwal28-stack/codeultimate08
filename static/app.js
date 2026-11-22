@@ -404,6 +404,23 @@ async function sendMessage(message) {
   }
 }
 
+$("autoDebugButton").addEventListener("click", async () => {
+  const code = promptEl.value.trim();
+  const debugPrompt = code
+    ? "AUTO DEBUG: Review this code for syntax errors, bugs, runtime issues, and edge cases. Explain the issues and provide a corrected complete version. Do not claim to run or test it.\\n\\n" + code
+    : "AUTO DEBUG: Analyze the code in the current conversation or attached files for syntax errors, bugs, runtime issues, and edge cases. Explain issues and give fixes. If there is no code available, ask me to paste or upload it. Do not claim to run or test code.";
+  const button = $("autoDebugButton");
+  button.disabled = true;
+  button.textContent = "DEBUGGING...";
+  try {
+    if (code) promptEl.value = "";
+    await sendMessage(debugPrompt);
+  } finally {
+    button.disabled = false;
+    button.textContent = "AUTO DEBUG";
+  }
+});
+
 // Enter sends the prompt; Shift+Enter inserts a new line.
 promptEl.addEventListener("keydown", event => {
   if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
